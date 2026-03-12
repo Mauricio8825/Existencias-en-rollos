@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Montilla | Existencias por Ancho</title>
+  <style>
+    :root{
+      --bg:#10151b;
+      --panel:#18202a;
+      --panel-2:#202a36;
+      --line:rgba(255,255,255,.08);
+      --line-2:rgba(255,255,255,.14);
+      --text:#eef3f8;
+      --muted:#9caaba;
+      --accent:#6cd7ff;
+      --accent-soft:rgba(108,215,255,.12);
+      --ok:#9dffbf;
+      --ok-soft:rgba(157,255,191,.12);
+      --warn:#ffd36b;
+      --warn-soft:rgba(255,211,107,.14);
+      --shadow:0 14px 36px rgba(0,0,0,.28);
+      --bad:#ff7b7b;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    body{ min-height:100vh; }
+
+    .wrap{
+      width:min(100%, 1850px);
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .hero,
+    .controls,
+    .diag,
+    .top-scroll,
+    .board-shell{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      padding:18px;
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:clamp(1.2rem,2vw,1.9rem);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.4;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line-2);
+      color:var(--text);
+      font-size:.85rem;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      flex:0 0 8px;
+    }
+
+    .status{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .status.error{
+      color:var(--bad);
+      font-weight:700;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .field input{
+      width:100%;
+      height:46px;
+      border:none;
+      outline:none;
+      border-radius:12px;
+      padding:0 14px;
+      background:#111821;
+      color:var(--text);
+      border:1px solid var(--line-2);
+      font-size:1rem;
+    }
+
+    .field input:focus{
+      border-color:rgba(108,215,255,.45);
+      box-shadow:0 0 0 4px rgba(108,215,255,.08);
+    }
+
+    .btn{
+      height:46px;
+      border:none;
+      border-radius:12px;
+      padding:0 16px;
+      background:#253446;
+      color:var(--text);
+      border:1px solid var(--line-2);
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .btn:disabled{
+      opacity:.6;
+      cursor:wait;
+    }
+
+    .diag{
+      padding:12px 14px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.55;
+      margin-bottom:14px;
+      word-break:break-word;
+    }
+
+    .diag strong{ color:var(--text); }
+
+    .top-scroll{
+      padding:8px 12px;
+      margin-bottom:14px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(108,215,255,.55) rgba(255,255,255,.06);
+    }
+
+    .top-scroll::-webkit-scrollbar{ height:12px; }
+    .top-scroll::-webkit-scrollbar-track{
+      background:rgba(255,255,255,.05);
+      border-radius:999px;
+    }
+    .top-scroll::-webkit-scrollbar-thumb{
+      background:rgba(108,215,255,.45);
+      border-radius:999px;
+    }
+
+    .top-scroll-inner{
+      height:1px;
+      min-width:100%;
+    }
+
+    .board-shell{
+      padding:12px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+    }
+
+    .board-shell::-webkit-scrollbar{
+      height:0;
+      display:none;
+    }
+
+    .board{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      min-width:max-content;
+    }
+
+    .col{
+      width:330px;
+      min-width:330px;
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+    }
+
+    .col-head{
+      padding:14px;
+      border-bottom:1px solid var(--line);
+      background:#1a2430;
+    }
+
+    .col-title{
+      font-size:1.15rem;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .col-metrics{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .metric{
+      display:inline-flex;
+      align-items:center;
+      min-height:32px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.83rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .metric.count{
+      background:var(--accent-soft);
+      border:1px solid rgba(108,215,255,.18);
+      color:var(--accent);
+    }
+
+    .metric.kg{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line-2);
+      color:var(--text);
+    }
+
+    .col-table-head{
+      display:grid;
+      grid-template-columns:95px 1fr;
+      gap:10px;
+      padding:10px 14px;
+      border-bottom:1px solid var(--line);
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:var(--muted);
+      background:#16202a;
+    }
+
+    .rows{ display:grid; }
+
+    .row{
+      display:grid;
+      grid-template-columns:95px 1fr;
+      gap:10px;
+      align-items:start;
+      padding:10px 14px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      font-size:.94rem;
+      line-height:1.35;
+    }
+
+    .row:last-child{ border-bottom:none; }
+
+    .row.ar-real{
+      background:var(--ok-soft);
+    }
+
+    .row.ar-ambiguous{
+      background:var(--warn-soft);
+    }
+
+    .peso{
+      font-weight:700;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .cell-wrap{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+
+    .calibre{
+      color:var(--text);
+      word-break:break-word;
+      font-family:Consolas, Monaco, monospace;
+      font-weight:700;
+    }
+
+    .empty-text{ color:var(--muted); }
+
+    .empty{
+      min-width:320px;
+      padding:24px 18px;
+      border:1px dashed var(--line-2);
+      border-radius:16px;
+      color:var(--muted);
+      text-align:center;
+      background:rgba(255,255,255,.02);
+    }
+
+    .footer{
+      margin-top:12px;
+      text-align:center;
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    @media (max-width:760px){
+      .controls{ grid-template-columns:1fr; }
+      .btn{ width:100%; }
+      .col{
+        width:294px;
+        min-width:294px;
+      }
+      .col-table-head,
+      .row{
+        grid-template-columns:85px 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Existencias de rollos por ancho</h1>
+      <div class="sub">
+        <span class="pill"><span class="dot"></span>Conectado</span>
+        </div>
+      <div id="status" class="status">Cargando datos...</div>
+    </section>
+
+    <section class="controls">
+      <div class="field">
+        <input id="filterInput" type="text" placeholder="Filtrar por ancho. Ejemplo: 76,2 | 101,6 | 330" />
+      </div>
+      <button id="reloadBtn" class="btn" type="button">Recargar</button>
+    </section>
+
+    <section id="diag" class="diag">
+      <strong>Diagnóstico:</strong> esperando datos...
+    </section>
+
+    <section id="topScroll" class="top-scroll" aria-label="Desplazamiento horizontal superior">
+      <div id="topScrollInner" class="top-scroll-inner"></div>
+    </section>
+
+    <section id="boardShell" class="board-shell">
+      <main id="board" class="board" aria-live="polite"></main>
+    </section>
+
+    <div class="footer">
+      Visor de existencias por ancho.
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbw2UVEhGFvwyo6XBAmDbjPL63dGGhxzpsW-z2M6OXji3UUsTUxP1l-tL5bj7uZ5S2bz/exec",
+      ambiguousARValues: new Set(["16"]),
+      filterDebounceMs: 120,
+      requestTimeoutMs: 15000
+    };
+
+    const state = {
+      allRecords: [],
+      visibleRecords: [],
+      lastLoadedAt: null,
+      stats: null
+    };
+
+    let activeLoadId = 0;
+    let syncingScroll = false;
+
+    const $board = document.getElementById("board");
+    const $boardShell = document.getElementById("boardShell");
+    const $topScroll = document.getElementById("topScroll");
+    const $topScrollInner = document.getElementById("topScrollInner");
+    const $diag = document.getElementById("diag");
+    const $status = document.getElementById("status");
+    const $filter = document.getElementById("filterInput");
+    const $reload = document.getElementById("reloadBtn");
+
+    const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+    function normalizeSpaces(value) {
+      return String(value ?? "")
+        .replace(/[\u00A0\u2007\u202F]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normForMatch(value) {
+      return normalizeSpaces(value).toLowerCase();
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function debounce(fn, delay) {
+      let timer = null;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    function parseMaybeNumber(text) {
+      const raw = normalizeSpaces(text);
+      if (!raw) return null;
+
+      let cleaned = raw.replace(/[^\d.,\-]/g, "");
+      if (!cleaned || cleaned === "-" || cleaned === "," || cleaned === ".") return null;
+
+      const lastComma = cleaned.lastIndexOf(",");
+      const lastDot = cleaned.lastIndexOf(".");
+
+      if (lastComma > -1 && lastDot > -1) {
+        if (lastComma > lastDot) {
+          cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+        } else {
+          cleaned = cleaned.replace(/,/g, "");
+        }
+      } else if (lastComma > -1) {
+        const commaCount = (cleaned.match(/,/g) || []).length;
+        cleaned = commaCount > 1 ? cleaned.replace(/,/g, "") : cleaned.replace(",", ".");
+      } else if (lastDot > -1) {
+        const dotCount = (cleaned.match(/\./g) || []).length;
+        if (dotCount > 1) cleaned = cleaned.replace(/\./g, "");
+      }
+
+      const n = Number(cleaned);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function formatKg(value) {
+      return new Intl.NumberFormat("es-MX", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function sortByName(a, b) {
+      return collator.compare(String(a || ""), String(b || ""));
+    }
+
+    function normalizeForceKey(value) {
+      return normalizeSpaces(value).toUpperCase().replace(/\.0+$/, "");
+    }
+
+    function isAmbiguousARValue(value) {
+      return CONFIG.ambiguousARValues.has(normalizeForceKey(value));
+    }
+
+    function classifyAR(record) {
+      const display = normalizeSpaces(record.calibreDisplay).toUpperCase();
+      const raw = normalizeSpaces(record.calibreRaw).toUpperCase();
+
+      if (/\bAR\b/.test(display) || /\bAR\b/.test(raw)) {
+        return "real";
+      }
+
+      const candidate = display || raw;
+      if (isAmbiguousARValue(candidate)) {
+        return "ambiguous";
+      }
+
+      return "";
+    }
+
+    function getDisplayedCalibre(record) {
+      const display = normalizeSpaces(record.calibreDisplay);
+      const raw = normalizeSpaces(record.calibreRaw);
+      const source = display || raw;
+      const type = classifyAR(record);
+
+      if (type === "real") {
+        return source || "—";
+      }
+
+      if (type === "ambiguous") {
+        const base = normalizeForceKey(source || raw || "16");
+        return `${base} AR`;
+      }
+
+      return source || "—";
+    }
+
+    function groupByWidth(records) {
+      const map = new Map();
+
+      for (const rec of records) {
+        if (!map.has(rec.ancho)) {
+          map.set(rec.ancho, {
+            items: [],
+            totalKg: 0
+          });
+        }
+
+        const bucket = map.get(rec.ancho);
+        bucket.items.push(rec);
+
+        const pesoNum = parseMaybeNumber(rec.peso);
+        if (pesoNum != null) bucket.totalKg += pesoNum;
+      }
+
+      for (const [, bucket] of map) {
+        bucket.items.sort((a, b) => {
+          const calA = getDisplayedCalibre(a);
+          const calB = getDisplayedCalibre(b);
+          const byCal = sortByName(calA, calB);
+          if (byCal !== 0) return byCal;
+
+          const pesoA = normalizeSpaces(a.peso);
+          const pesoB = normalizeSpaces(b.peso);
+          return sortByName(pesoA, pesoB);
+        });
+      }
+
+      return new Map([...map.entries()].sort((a, b) => sortByName(a[0], b[0])));
+    }
+
+    function syncTopScrollbar() {
+      const boardWidth = Math.max($board.scrollWidth, $board.clientWidth, $boardShell.scrollWidth);
+      $topScrollInner.style.width = boardWidth + "px";
+
+      const needsScroll = boardWidth > $topScroll.clientWidth + 2;
+      $topScroll.style.display = needsScroll ? "block" : "none";
+
+      if (needsScroll) {
+        $topScroll.scrollLeft = $boardShell.scrollLeft;
+      }
+    }
+
+    function attachScrollSync() {
+      $topScroll.addEventListener("scroll", () => {
+        if (syncingScroll) return;
+        syncingScroll = true;
+        $boardShell.scrollLeft = $topScroll.scrollLeft;
+        syncingScroll = false;
+      });
+
+      $boardShell.addEventListener("scroll", () => {
+        if (syncingScroll) return;
+        syncingScroll = true;
+        $topScroll.scrollLeft = $boardShell.scrollLeft;
+        syncingScroll = false;
+      });
+
+      window.addEventListener("resize", () => {
+        requestAnimationFrame(syncTopScrollbar);
+      });
+    }
+
+    function loadBackendJSONP() {
+      return new Promise((resolve, reject) => {
+        const callbackName = "__backendCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+        const script = document.createElement("script");
+        const timeoutMs = CONFIG.requestTimeoutMs;
+
+        const cleanup = () => {
+          if (window[callbackName]) {
+            try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+          }
+          if (script.parentNode) script.parentNode.removeChild(script);
+        };
+
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error("Tiempo de espera agotado al consultar el backend."));
+        }, timeoutMs);
+
+        window[callbackName] = function(response) {
+          clearTimeout(timer);
+          cleanup();
+
+          if (!response) {
+            reject(new Error("El backend devolvió una respuesta vacía."));
+            return;
+          }
+
+          if (!response.ok) {
+            reject(new Error(response.msg || "Error desconocido en backend."));
+            return;
+          }
+
+          resolve(response);
+        };
+
+        const sep = CONFIG.WEB_APP_URL.includes("?") ? "&" : "?";
+        const url = CONFIG.WEB_APP_URL + sep + "action=existencias&callback=" + encodeURIComponent(callbackName);
+
+        script.src = url;
+        script.async = true;
+        script.onerror = function() {
+          clearTimeout(timer);
+          cleanup();
+          reject(new Error("No se pudo cargar el script remoto del backend."));
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+
+    function render() {
+      const filterText = normForMatch($filter.value);
+
+      const visible = filterText
+        ? state.allRecords.filter(r => normForMatch(r.ancho).includes(filterText))
+        : [...state.allRecords];
+
+      state.visibleRecords = visible;
+
+      const grouped = groupByWidth(visible);
+      const totalVisible = visible.length;
+      const totalLoaded = state.allRecords.length;
+
+      const totalKgVisible = visible.reduce((acc, item) => {
+        const n = parseMaybeNumber(item.peso);
+        return acc + (n != null ? n : 0);
+      }, 0);
+
+      const loadedText = state.lastLoadedAt
+        ? new Date(state.lastLoadedAt).toLocaleString("es-MX")
+        : "sin fecha";
+
+      $diag.innerHTML = `
+        <strong>Diagnóstico:</strong>
+        Rollos totales: <strong>${totalVisible}</strong>
+        &nbsp;|&nbsp;
+        Kg totales: <strong>${formatKg(totalKgVisible)} kg</strong>
+        &nbsp;|&nbsp;
+        Filas: <strong>${totalLoaded}</strong>
+        <br>
+        Última carga: <strong>${escapeHtml(loadedText)}</strong>
+      `;
+
+      if (!grouped.size) {
+        $board.innerHTML = `<div class="empty">No hay registros para mostrar con el filtro actual.</div>`;
+        syncTopScrollbar();
+        return;
+      }
+
+      $board.innerHTML = [...grouped.entries()].map(([ancho, group]) => `
+        <section class="col">
+          <div class="col-head">
+            <div class="col-title">Ancho: ${escapeHtml(ancho)}</div>
+            <div class="col-metrics">
+              <span class="metric count">${group.items.length} rollos</span>
+              <span class="metric kg">${formatKg(group.totalKg)} kg</span>
+            </div>
+          </div>
+
+          <div class="col-table-head">
+            <div>Peso</div>
+            <div>Calibre (F)</div>
+          </div>
+
+          <div class="rows">
+            ${group.items.map(item => {
+              const peso = normalizeSpaces(item.peso) || "—";
+              const calibre = getDisplayedCalibre(item);
+
+              let rowClass = "";
+              const arType = classifyAR(item);
+
+              if (arType === "real") {
+                rowClass = "ar-real";
+              } else if (arType === "ambiguous") {
+                rowClass = "ar-ambiguous";
+              }
+
+              return `
+                <div class="row ${rowClass}">
+                  <div class="peso ${peso === "—" ? "empty-text" : ""}">${escapeHtml(peso)}</div>
+                  <div class="cell-wrap">
+                    <div class="calibre ${calibre === "—" ? "empty-text" : ""}">${escapeHtml(calibre)}</div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `).join("");
+
+      requestAnimationFrame(syncTopScrollbar);
+    }
+
+    async function loadData() {
+      const loadId = ++activeLoadId;
+
+      $reload.disabled = true;
+      $status.className = "status";
+      $status.textContent = "Cargando datos desde Apps Script...";
+      $board.innerHTML = `<div class="empty">Cargando datos...</div>`;
+
+      try {
+        const payload = await loadBackendJSONP();
+        if (loadId !== activeLoadId) return;
+
+        state.allRecords = Array.isArray(payload.records) ? payload.records : [];
+        state.stats = payload.stats || {};
+        state.lastLoadedAt = Date.now();
+
+        $status.className = "status";
+        $status.textContent = `Registros: ${state.allRecords.length}`;
+
+        render();
+      } catch (err) {
+        console.error(err);
+        if (loadId !== activeLoadId) return;
+
+        $status.className = "status error";
+        $status.textContent = `Error al cargar datos: ${err.message}`;
+        $diag.innerHTML = `<strong>Diagnóstico:</strong> no se pudo cargar el backend de existencias.`;
+        $board.innerHTML = `<div class="empty">No fue posible cargar la información.</div>`;
+        syncTopScrollbar();
+      } finally {
+        if (loadId === activeLoadId) {
+          $reload.disabled = false;
+        }
+      }
+    }
+
+    $filter.addEventListener("input", debounce(render, CONFIG.filterDebounceMs));
+    $reload.addEventListener("click", loadData);
+
+    attachScrollSync();
+    loadData();
+  </script>
+</body>
+</html>

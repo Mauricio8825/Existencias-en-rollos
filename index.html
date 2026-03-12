@@ -389,10 +389,8 @@
     <section class="hero">
       <h1>Existencias de rollos por ancho</h1>
       <div class="sub">
-        <span class="pill"><span class="dot"></span>Lectura directa desde Apps Script</span>
-        <span class="pill">Separación: <strong>GAL / NEG</strong></span>
-        <span class="pill">Fuente: <strong>columna A</strong></span>
-      </div>
+        <span class="pill"><span class="dot"></span>Lectura Script Entradas</span>
+        </div>
       <div id="status" class="status">Cargando datos...</div>
     </section>
 
@@ -861,7 +859,7 @@
         state.lastLoadedAt = Date.now();
 
         $status.className = "status";
-        $status.textContent = `Carga exitosa. Registros finales: ${state.allRecords.length}`;
+        $status.textContent = `Carga exitosa. Registros: ${state.allRecords.length}`;
 
         render();
       } catch (err) {
